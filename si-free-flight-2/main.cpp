@@ -6,6 +6,7 @@
 
 #include "camera.h"
 #include "game_state.h"
+#include "icon_data.h"
 #include "renderer.h"
 #include "scene.h"
 #include "selection.h"
@@ -13,10 +14,14 @@
 // Main game entry point
 int main(void)
 {
-    SetTraceLogLevel(TraceLogLevel::LOG_ERROR);
+    SetTraceLogLevel(TraceLogLevel::LOG_WARNING);
+
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 720, "SI Free Flight – Take 2");
+    Image iconImg = LoadImageFromMemory(".png", icon_png, icon_png_len);
+    SetWindowIcon(iconImg);
+    UnloadImage(iconImg);
     {
         SetTargetFPS(60);
         GameState state;
@@ -48,6 +53,12 @@ int main(void)
             }
             if (IsKeyPressed(KEY_H)) {
                 state.renderer_.toggleHud();
+            }
+            if (IsKeyPressed(KEY_I)) {
+                state.renderer_.toggleAbout();
+            }
+            if (IsKeyPressed(KEY_ESCAPE) && state.renderer_.isAboutActive()) {
+                state.renderer_.toggleAbout();
             }
 
             // Handle object picking when cursor is visible and user clicks
@@ -90,6 +101,9 @@ int main(void)
                 state.renderer_.drawObjectInfo(state.cameraController_,
                                         state.scene_,
                                         state.selection_);
+                if (state.renderer_.isAboutActive()) {
+                    state.renderer_.drawAbout();
+                }
             }
             EndDrawing();
         }

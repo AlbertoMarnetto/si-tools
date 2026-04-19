@@ -2,6 +2,7 @@
 
 #include "camera.h"
 #include "game_state.h"
+#include "icon_data.h"
 #include "si_coords.h"
 
 #include "raymath.h"
@@ -16,8 +17,13 @@ Renderer::Renderer()
     emissiveMaterial = {};
     pulseTime = 0.0f;
     shouldShowHud = true;
+    showAbout_ = false;
+    aboutTexture = {};
 
     rlSetClipPlanes(rlGetCullDistanceNear(), 35'000);
+    Image iconImg = LoadImageFromMemory(".png", icon_png, icon_png_len);
+    aboutTexture = LoadTextureFromImage(iconImg);
+    UnloadImage(iconImg);
 }
 
 Renderer::~Renderer()
@@ -217,11 +223,12 @@ void Renderer::drawHUD(GameState const& state)
         DrawText("Q/E: Yaw", 10, nextLine(), 20, DARKGRAY);
         DrawText("R/F: Pitch", 10, nextLine(), 20, DARKGRAY);
         DrawText("Z/C: Roll", 10, nextLine(), 20, DARKGRAY);
-        DrawText("Shift: fast (X to invert speed)", 10, nextLine(), 20, DARKGRAY);
-        DrawText("L: release mouse", 10, nextLine(), 20, DARKGRAY);
-        DrawText("H: toggle aux infos", 10, nextLine(), 20, DARKGRAY);
-        DrawText(TextFormat("FPS: %02i", GetFPS()), 10, currentScreenHeight - 30, 20, DARKGRAY);
+        DrawText("Shift: Fast (X to invert speed)", 10, nextLine(), 20, DARKGRAY);
+        DrawText("L: Release mouse", 10, nextLine(), 20, DARKGRAY);
+        DrawText("H: Toggle HUD", 10, nextLine(), 20, DARKGRAY);
+        DrawText("I: About", 10, nextLine(), 20, DARKGRAY);
 
+        DrawText(TextFormat("FPS: %02i", GetFPS()), 10, currentScreenHeight - 30, 20, DARKGRAY);
 
         // Island info
         if (state.island_.isLoaded()) {
@@ -264,6 +271,43 @@ void Renderer::drawHUD(GameState const& state)
                  20,
                  DARKGRAY);
     }
+}
+
+void Renderer::drawAbout()
+{
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    int boxWidth = 600;
+    int boxHeight = 420;
+    int boxLeft = (screenWidth - boxWidth) / 2;
+    int boxTop = (screenHeight - boxHeight) / 2;
+
+    DrawRectangle(boxLeft, boxTop, boxWidth, boxHeight, (Color){20, 20, 30, 200});
+    DrawRectangleLines(boxLeft, boxTop, boxWidth, boxHeight, GOLD);
+
+    int textX = boxLeft + 30;
+    int textY = boxTop + 30;
+    auto nextLine = [&](){ int result = textY; textY += 30; return result; };
+
+    DrawText("SI Free Flight -- Take 2", textX, nextLine(), 30, GOLD);
+    textY += 10;
+    DrawText("A Stunt Island free-roam flight simulator", textX, nextLine(), 20, LIGHTGRAY);
+
+    textY += 20;
+
+    int imgW = aboutTexture.width;
+    int imgH = aboutTexture.height;
+    float scale = 0.5f;
+    int drawW = (int)(imgW * scale);
+    int drawH = (int)(imgH * scale);
+    DrawTextureEx(aboutTexture, {float(textX), float(nextLine())}, 0, scale, WHITE);
+
+    textY += drawH;
+    DrawText("Version 1.0.0", textX, nextLine(), 20, WHITE);
+    DrawText("Alberto Marnetto, 2026", textX, nextLine(), 20, LIGHTGRAY);
+    DrawText("Released under the MIT License", textX, nextLine(), 20, LIGHTGRAY);
+    DrawText("Press I to close", textX, nextLine(), 20, LIGHTGRAY);
 }
 
 void Renderer::drawObjectInfo(const CameraController& cameraController,

@@ -33,6 +33,7 @@ add_executable(si-free-flight-2
 
     camera.cpp
     game_state.cpp
+    icon_data.cpp
     island.cpp
     lzexe_decompress.cpp
     preview_box.cpp

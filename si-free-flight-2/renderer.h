@@ -56,10 +56,18 @@ public:
                         const Scene& scene,
                         const Selection& selection);
 
+    // Draw about screen
+    void drawAbout();
+
+    // Setup window icon and about texture from embedded data
+    void setupEmbeddedIcon(const unsigned char* pngData, int size);
+
     // Preview renderer
     PreviewRenderer& getPreviewRenderer() { return previewRenderer; }
 
     void toggleHud() { shouldShowHud = not shouldShowHud; }
+    void toggleAbout() { showAbout_ = not showAbout_; }
+    bool isAboutActive() const { return showAbout_; }
 
 private:
     Material defaultMaterial;
@@ -67,6 +75,7 @@ private:
     Material emissiveMaterial;
     PreviewRenderer previewRenderer;
     float pulseTime; // Accumulated time for pulsing effect
+    Texture2D aboutTexture;
 
     // Draw selected object highlight
     void drawSelectionHighlight(const Scene& scene, const Selection& selection);
@@ -75,5 +84,6 @@ private:
     void drawFailedMeshes();
 
     bool shouldShowHud;
+    bool showAbout_;
 };
 
